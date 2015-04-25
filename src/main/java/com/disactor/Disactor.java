@@ -17,22 +17,24 @@ public class Disactor<EVENT extends Event<EVENT>> implements Actor<EVENT>{
             int bufferSize,
             ExceptionHandler<EVENT> exceptionHandler,
             Executor executor,
-            Actor<EVENT>... actors) {
-        this(new Disruptor<>(eventFactory, bufferSize, executor), exceptionHandler, actors);
+            Actor<EVENT> actor) {
+        this(new Disruptor<EVENT>(eventFactory, bufferSize, executor), exceptionHandler, actor);
     }
 
-    public Disactor(Disruptor<EVENT> disruptor, ExceptionHandler<EVENT> exceptionHandler, Actor<EVENT>[] actors) {
+    public Disactor(Disruptor<EVENT> disruptor, ExceptionHandler<EVENT> exceptionHandler, Actor<EVENT> actor) {
         this.disruptor = disruptor;
         disruptor.handleExceptionsWith(exceptionHandler);
-        for (final Actor<EVENT> actor : actors) {
-            //noinspection unchecked
-            disruptor.handleEventsWith(new EventHandler<EVENT>() {
-                @Override
-                public void onEvent(EVENT event, long sequence, boolean endOfBatch) throws Exception {
-                    actor.onEvent(event);
-                }
-            });
-        }
+        //noinspection unchecked
+        disruptor.handleEventsWith(createEventHandler(actor));
+    }
+
+    private EventHandler<EVENT> createEventHandler(final Actor<EVENT> actor) {
+        return new EventHandler<EVENT>() {
+            @Override
+            public void onEvent(EVENT event, long sequence, boolean endOfBatch) throws Exception {
+                actor.onEvent(event);
+            }
+        };
     }
 
     public void start() {
@@ -43,6 +45,7 @@ public class Disactor<EVENT extends Event<EVENT>> implements Actor<EVENT>{
         disruptor.shutdown();
     }
 
+    @Override
     public void onEvent(EVENT event) {
         long seq = disruptor.getRingBuffer().next();
         EVENT nextEvent = disruptor.getRingBuffer().get(seq);
