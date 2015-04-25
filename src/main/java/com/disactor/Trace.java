@@ -1,9 +1,9 @@
 package com.disactor;
 
-public class Trace extends RuntimeException implements Copyable<Trace> {
+public class Trace implements Copyable<Trace> {
 
     private final Trace[] nested;
-    private int lastN;
+    private int lastN = 0;
 
     private final Trace parent;
 
