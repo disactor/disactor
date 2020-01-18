@@ -83,10 +83,12 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
     }
 
     private void play(float pitch, float probability, double rms) {
-        if (this.riddle.get() == null) {
+//        out("play");
+        Pitch riddle;
+        if ((riddle = this.riddle.get()) == null) {
             int index = random.nextInt(notes.size());
             String riddleNote = notes.get(index);
-            Pitch riddle = pitchByNote.get(riddleNote);
+            riddle = pitchByNote.get(riddleNote);
             String chrome = "";
             if (riddle != null) {
                 chrome = riddle.getChrome();
@@ -111,18 +113,25 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
                 }
             }
             if (guess != null) {
-                Pitch previousGuess = this.guess.get();
-                if (previousGuess == null || previousGuess != guess) {
-                    this.guess.set(guess);
-                    Pitch riddle = this.riddle.get();
-                    if (riddle != null) {
+//                Pitch previousGuess = this.guess.get();
+//                if (previousGuess == null || previousGuess != guess) {
+//                    this.guess.set(guess);
+//                    Pitch riddle = this.riddle.get();
+//                    if (riddle != null) {
                         String baseRiddleChrome = riddle.getChrome().substring(0, 2);
                         String baseGuessChrome = guess.getChrome().substring(0, 2);
-                        player.play(guess.getNote());
+//                        player.play(guess.getNote());
                         if (baseGuessChrome.equals(baseRiddleChrome)) {
-                            out("correct");
+                            String message = String.format("correct!  %s [%s]", baseGuessChrome, baseRiddleChrome);
+                            out(message);
                             this.riddle.set(null);
                             this.guess.set(null);
+                            player.play(riddle.getNote());
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             play(-1, 0, 0);
                         } else {
                             player.play(riddle.getNote());
@@ -131,8 +140,8 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
                         String message = String.format("  %s [%s]", baseGuessChrome, baseRiddleChrome);
                         out(message);
                     }
-                }
-            }
+//                }
+//            }
         }
     }
 
