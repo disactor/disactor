@@ -12,7 +12,7 @@ public class DynamicDisactorFactory {
 
 
     public Object getObject() throws Exception {
-
+        //fixme: fix deprecated
         Class proxyClass = Proxy.getProxyClass(this.getClass().getClassLoader(), Class.forName(type));
         Object instance = proxyClass.newInstance();
 
