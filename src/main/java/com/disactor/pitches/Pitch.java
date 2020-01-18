@@ -1,9 +1,5 @@
 package com.disactor.pitches;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 public enum Pitch {
 
     Do0("Do0", "C0", 16.35),
@@ -115,18 +111,22 @@ public enum Pitch {
     Li8("Li8", "A#8", 7458.62),
     Si8("Si8", "B8", 7902.13);
 
-    private String chrome;
+    private String chroma;
     private String note;
     private final double pitch;
 
-    Pitch(String chrome, String note, double pitch) {
-        this.chrome = chrome;
+    Pitch(String chroma, String note, double pitch) {
+        this.chroma = chroma;
         this.note = note;
         this.pitch = pitch;
     }
 
-    public String getChrome() {
-        return chrome;
+    public String getChroma() {
+        return chroma;
+    }
+
+    public String getBaseChroma() {
+        return chroma.substring(0, 2);
     }
 
     public double getPitch() {
