@@ -58,87 +58,79 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
             .filter(note -> !exclude.contains(note))
             .collect(Collectors.toList());
 
-    private final Map<String, Pitch> pitchByNote  = new LinkedHashMap<>();
-    private final AtomicReference<Pitch> pitch = new AtomicReference<>(null);
-    private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
+    private final Map<String, Pitch> pitchByNote = new LinkedHashMap<>();
 
-    private void play() {
+    {
         for (Pitch pitch : Pitch.values()) {
             pitchByNote.put(pitch.getNote(), pitch);
         }
-        Player player = new Player();
-        Random random = new Random();
-        while (!Thread.currentThread().isInterrupted()) {
-            int index = random.nextInt(notes.size());
-            String note = notes.get(index);
-            Pitch riddle = pitchByNote.get(note);
-            String chrome = null;
-            if (riddle != null) {
-                chrome = riddle.getChrome();
-            }
-            out("riddle is " + chrome + " for note " + note + ", index " + index);
-            this.riddle.set(riddle);
-            boolean correct = false;
-            player.play(note);
-
-            Pitch previousGuess = null;
-            while (!correct) {
-                Pitch pitch;
-                while ((pitch = this.pitch.get()) == null) {
-                    synchronized (this.pitch) {
-                        try {
-                            this.pitch.wait(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                if (previousGuess == null || previousGuess != pitch) {
-                    this.pitch.set(null);
-                    previousGuess = pitch;
-                    if (note.substring(0, 2).equals(pitch.getNote().substring(0, 2))) {
-                        correct = true;
-                        out("correct");
-                    }
-                    player.play(pitch.getNote());
-                }
-            }
-        }
     }
+
+    private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
+    private final AtomicReference<Pitch> guess = new AtomicReference<>(null);
+    private final Player player = new Player();
+    private final Random random = new Random();
 
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
         if (pitchDetectionResult.getPitch() != -1) {
-            double timeStamp = audioEvent.getTimeStamp();
             float pitch = pitchDetectionResult.getPitch();
             float probability = pitchDetectionResult.getProbability();
+            double rms = audioEvent.getRMS() * 100;
 
-            if (probability > 0.5) {
-                Pitch match = null;
-                for (Pitch aPitch : Pitch.values()) {
-                    double diff = Math.abs(aPitch.getPitch() - pitch);
-                    if (diff < 1) {
-                        if (match != null) {
-                            if (Math.abs(match.getPitch() - pitch) < diff) {
-                                aPitch = match;
-                            }
+            play(pitch, probability, rms);
+        }
+    }
+
+    private void play(float pitch, float probability, double rms) {
+        if (this.riddle.get() == null) {
+            int index = random.nextInt(notes.size());
+            String riddleNote = notes.get(index);
+            Pitch riddle = pitchByNote.get(riddleNote);
+            String chrome = "";
+            if (riddle != null) {
+                chrome = riddle.getChrome();
+            }
+            out("new riddle is [" + chrome.substring(0, 2) + "]");
+            this.riddle.set(riddle);
+            player.play(riddleNote);
+        }
+
+
+        if (probability > 0.5) {
+            Pitch guess = null;
+            for (Pitch aPitch : Pitch.values()) {
+                double diff = Math.abs(aPitch.getPitch() - pitch);
+                if (diff < 1) {
+                    if (guess != null) {
+                        if (Math.abs(guess.getPitch() - pitch) < diff) {
+                            aPitch = guess;
                         }
-                        match = aPitch;
                     }
+                    guess = aPitch;
                 }
-                if (match != null) {
-                    this.pitch.set(match);
-                    double rms = audioEvent.getRMS() * 100;
-                    String riddleChrome = "N/A";
-                    String riddleNote = "N/A";
+            }
+            if (guess != null) {
+                Pitch previousGuess = this.guess.get();
+                if (previousGuess == null || previousGuess != guess) {
+                    this.guess.set(guess);
                     Pitch riddle = this.riddle.get();
                     if (riddle != null) {
-                        riddleChrome = riddle.getChrome();
-                        riddleNote = riddle.getNote();
+                        String baseRiddleChrome = riddle.getChrome().substring(0, 2);
+                        String baseGuessChrome = guess.getChrome().substring(0, 2);
+                        player.play(guess.getNote());
+                        if (baseGuessChrome.equals(baseRiddleChrome)) {
+                            out("correct");
+                            this.riddle.set(null);
+                            this.guess.set(null);
+                            play(-1, 0, 0);
+                        } else {
+                            player.play(riddle.getNote());
+                        }
+//                        String message = String.format(" %s [%s]  %s|%s %.2fHz|%.2fHz|%.2f|%.5f", baseGuessChrome, baseRiddleChrome, guess.getChrome(), riddle.getChrome(), guess.getPitch(), pitch, probability, rms);
+                        String message = String.format("  %s [%s]", baseGuessChrome, baseRiddleChrome);
+                        out(message);
                     }
-//                    String message = String.format("%s|%s-%s|%s|%.2fHz|%.2fHz|%.2f|%.5f", riddleNote, riddleChrome,  match.getChrome(), match.getNote(), match.getPitch(), pitch, probability, rms);
-                    String message = String.format("%s-%s|%.2fHz|%.2fHz|%.2f|%.5f", riddleChrome,  match.getChrome(), match.getPitch(), pitch, probability, rms);
-                    out(message);
                 }
             }
         }
@@ -193,7 +185,6 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
     };
 
     public Pitches() {
-
         this.setLayout(new GridLayout(0, 1));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Pitch Detector");
@@ -223,8 +214,6 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
         textArea = new JTextArea();
         textArea.setEditable(false);
         add(new JScrollPane(textArea));
-
-        Executors.newSingleThreadExecutor().submit(this::play);
     }
 
     private void setNewMixer(Mixer mixer) throws LineUnavailableException,
@@ -262,9 +251,6 @@ public class Pitches extends JFrame implements PitchDetectionHandler {
 
         new Thread(dispatcher, "Audio dispatching").start();
     }
-
-
-
 
 
     public class InputPanel extends JPanel {
