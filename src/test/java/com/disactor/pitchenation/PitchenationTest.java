@@ -1,9 +1,9 @@
-package com.disactor.pitches;
+package com.disactor.pitchenation;
 
 import org.junit.Test;
 import org.jfugue.player.Player;
 
-public class PitchesTest {
+public class PitchenationTest {
 
     @Test
     public void test() {

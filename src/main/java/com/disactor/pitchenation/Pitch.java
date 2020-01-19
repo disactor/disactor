@@ -1,4 +1,4 @@
-package com.disactor.pitches;
+package com.disactor.pitchenation;
 
 public enum Pitch {
 
@@ -111,14 +111,18 @@ public enum Pitch {
     Li8("Li8", "A#8", 7458.62),
     Si8("Si8", "B8", 7902.13);
 
-    private String chroma;
-    private String note;
+    private final String chroma;
+    private final String note;
     private final double pitch;
+    private final String baseChroma;
+    private final int octave;
 
     Pitch(String chroma, String note, double pitch) {
         this.chroma = chroma;
         this.note = note;
         this.pitch = pitch;
+        this.baseChroma = chroma.substring(0, 2);
+        this.octave = Integer.parseInt(chroma.substring(2, 3));
     }
 
     public String getChroma() {
@@ -126,7 +130,11 @@ public enum Pitch {
     }
 
     public String getBaseChroma() {
-        return chroma.substring(0, 2);
+        return baseChroma;
+    }
+
+    public int getOctave() {
+        return octave;
     }
 
     public double getPitch() {

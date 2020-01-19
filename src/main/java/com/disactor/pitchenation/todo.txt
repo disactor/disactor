@@ -1,0 +1,22 @@
+
+- Play intervals to C on success.
+- Configuration: show log, notes, range, probability, octave tolerance, playInit="", export config do txt
+
+    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
+            .put("Do", new MyColor(99.2f, 79.6f, 1.2f))
+            .put("Dee", new MyColor(20.4f, 1.2f, 29.4f))
+            .put("De", new MyColor(20.4f, 1.2f, 29.4f))
+            .put("See", new MyColor(6.3f, 9.4f, 41.6f))
+            .put("Di", new MyColor(25.4f, 1.2f, 29.4f))
+
+//            .put("Re", new MyColor(1.2f, 70.2f, 99.2f))
+//            .put("Ri", new MyColor(95.7f, 22.0f, 2.4f))
+            .put("Mi", new MyColor(98.0f, 43.5f, 98.8f))
+            .put("Fa", new MyColor(0.8f, 98.8f, 14.5f))
+            .put("Fi", new MyColor(1.2f, 34.5f, 27.1f))
+            .put("So", new MyColor(98.8f, 0.8f, 0.8f))
+            .put("Se", new MyColor(6.3f, 9.4f, 41.6f))
+            .put("La", new MyColor(98.4f, 96.1f, 67.8f))
+            .put("Li", new MyColor(0.8f, 95.3f, 98.8f))
+            .put("Si", new MyColor(85.9f, 75.3f, 95.7f))
+            .build();
