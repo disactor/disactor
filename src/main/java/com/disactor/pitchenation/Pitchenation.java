@@ -20,7 +20,9 @@ import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -103,7 +105,8 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             Pitch riddle = pitchByNote.get(riddleNote);
 
             Pitch prevRiddle = this.prevRiddle.get();
-            if (riddle != null && (prevRiddle == null || !riddle.getBaseChroma().equals(prevRiddle.getBaseChroma()))) {
+            if (riddle != null
+                    && (prevRiddle == null || !riddle.getBaseChroma().equals(prevRiddle.getBaseChroma()))) {
                 out(" [" + riddle.getBaseChroma() + "] is the new riddle");
                 this.riddle.set(riddle);
                 SwingUtilities.invokeLater(() -> {
@@ -111,7 +114,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                     riddleColorLabel.setText("");
                     riddleColorPanel.setBackground(riddleColor);
                 });
-                player.play("I[Piano] " + riddleNote);
+                player.play(riddleNote);
             }
         }
 
@@ -132,7 +135,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                     this.guess.set(null);
 
                     if (isRunning.get()) {
-                        player.play("I[Piano] " + riddle.getNote());
+                        player.play(riddle.getNote());
                     }
                     try {
                         Thread.sleep(300);
@@ -142,7 +145,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                     play(-1, 0, 0, guess);
                 } else {
                     if (isRunning.get()) {
-                        player.play("I[Piano] " + riddle.getNote());
+                        player.play(riddle.getNote());
                     }
                 }
                 out(message);
@@ -323,21 +326,21 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         setVisible(true);
 
         Executors.newSingleThreadExecutor().execute(() -> {
-                    player.play("C3");
-                    play(-1, 0, 0, matchPitch(-1));
+            player.play("C3");
+            play(-1, 0, 0, matchPitch(-1));
 
-                    for (Mixer.Info info : Shared.getMixerInfo(false, true)) {
-                        if (info.toString().contains("Default")) {
-                            Mixer newValue = AudioSystem.getMixer(info);
-                            try {
-                                setNewMixer(newValue);
-                            } catch (LineUnavailableException e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        }
+            for (Mixer.Info info : Shared.getMixerInfo(false, true)) {
+                if (info.toString().contains("Default")) {
+                    Mixer newValue = AudioSystem.getMixer(info);
+                    try {
+                        setNewMixer(newValue);
+                    } catch (LineUnavailableException e) {
+                        e.printStackTrace();
                     }
-                });
+                    break;
+                }
+            }
+        });
     }
 
     private void setNewMixer(Mixer mixer) throws LineUnavailableException {
