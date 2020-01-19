@@ -280,23 +280,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             }
         };
         JPanel pitchAlgoPanel = new PitchAlgoPanel(algoChangeListener);
-
         add(pitchAlgoPanel);
-
-        JPanel colorsPanel = new JPanel();
-
-        add(colorsPanel);
-        colorsPanel.setLayout(new GridLayout(1, 12));
-        for (Map.Entry<String, Color> chromaColor : chromaToColor.entrySet()) {
-            JPanel colorPanel = new JPanel();
-            colorsPanel.add(colorPanel);
-            colorPanel.setBackground(chromaColor.getValue());
-            JLabel colorLabel = new JLabel(" " + chromaColor.getKey() + " ");
-            colorPanel.add(colorLabel);
-            colorLabel.setForeground(Color.WHITE);
-            colorLabel.setBackground(Color.BLACK);
-            colorLabel.setOpaque(true);
-        }
 
 //        textArea.setEditable(false);
 //        add(new JScrollPane(textArea));
@@ -316,6 +300,21 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         guessColorLabel.setVerticalAlignment(SwingConstants.CENTER);
         guessColorPanel.add(guessColorLabel);
 
+        JPanel colorsPanel = new JPanel();
+        add(colorsPanel);
+        colorsPanel.setLayout(new GridLayout(1, 12));
+        for (Map.Entry<String, Color> chromaColor : chromaToColor.entrySet()) {
+            JPanel colorPanel = new JPanel();
+            colorsPanel.add(colorPanel);
+            colorPanel.setBackground(chromaColor.getValue());
+            JLabel colorLabel = new JLabel(" " + chromaColor.getKey() + " ");
+            colorPanel.add(colorLabel);
+            colorLabel.setForeground(Color.WHITE);
+            colorLabel.setBackground(Color.BLACK);
+            colorLabel.setOpaque(true);
+        }
+
+
         pack();
 
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -323,11 +322,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
 
         setVisible(true);
 
-        Executors.newSingleThreadExecutor().
-
-                execute(() ->
-
-                {
+        Executors.newSingleThreadExecutor().execute(() -> {
                     player.play("C3");
                     play(-1, 0, 0, matchPitch(-1));
 
