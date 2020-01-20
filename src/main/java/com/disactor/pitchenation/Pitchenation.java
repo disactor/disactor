@@ -80,13 +80,13 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
 
     private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
             .put("Do", new Color(255, 0, 0)) // Red 620-750 nm (400-484 THz frequency)
-            .put("Di", new Color(127, 0,0)) // Bordo
+            .put("Di", new Color(127, 0, 0)) // Bordo
 //            .put("Di", new Color(255, 175,175)) // Pink
             .put("Re", new Color(255, 127, 0))    // Orange 590-620 nm
             .put("Ri", new Color(127, 127, 0)) // Olive
             .put("Mi", new Color(255, 255, 0))   // Yellow 570-590 nm
             .put("Fa", new Color(0, 255, 0))  // Green 495-570 nm
-            .put("Fi", new Color(0, 127,127))  // Pine
+            .put("Fi", new Color(0, 127, 127))  // Pine
             .put("So", new Color(0, 255, 255)) // Cyan
             .put("Se", new Color(0, 0, 127)) // Navy
             .put("La", new Color(0, 0, 255)) // Blue: 450-495 nm
@@ -170,6 +170,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                         guessLabel.setText("    ");
                         guessPanel.setBackground(null);
                         pitchyPanel.setBackground(null);
+                        pitchyPanel.setVisible(false);
                         chromaPanel.setBackground(null);
                     });
                     player.play(riddleNote);
@@ -213,37 +214,43 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         double diff = pitch - guess.getPitch();
         guessLabel.setVisible(true);
         guessLabel.setText(" " + guess.getChroma() + " ");
-        guessPanel.setBackground(chromaToColor.get(guess.getChroma()));
+        Color guessColor = chromaToColor.get(guess.getChroma());
+        guessPanel.setBackground(guessColor);
 
-        if (!isRunning.get()) {
-            Pitch flat = pitchByOrdinal.get(guess.ordinal() - 1);
-            Pitch sharp = pitchByOrdinal.get(guess.ordinal() + 1);
-            if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but who cares?
-                Pitch pitchy;
-                if (diff < 0) {
-                    pitchy = flat;
-                } else {
-                    pitchy = sharp;
-                }
-                pitchyPanel.setBackground(chromaToColor.get(pitchy.getChroma()));
+        Pitch flat = pitchByOrdinal.get(guess.ordinal() - 1);
+        Pitch sharp = pitchByOrdinal.get(guess.ordinal() + 1);
+        if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but who cares?
+            Pitch pitchy;
+            if (diff < 0) {
+                pitchy = flat;
+            } else {
+                pitchy = sharp;
+            }
+            Color pitchyColor = chromaToColor.get(pitchy.getChroma());
+            pitchyPanel.setBackground(pitchyColor);
 
-                double pitchyDiff = Math.abs(guess.getPitch() - pitchy.getPitch());
-                double ratio = Math.abs(diff)  / pitchyDiff;
-                int width = (int) (ratio * 300) + 1;
-//                if (width < 1) {
-//                    width = 1;
-//                }
+            double pitchyDiff = Math.abs(guess.getPitch() - pitchy.getPitch());
+            double ratio = Math.abs(diff) / pitchyDiff;
+            int width = (int) (ratio * 300) + 1;
+            if (!isRunning.get()) {
+//                pitchyPanel.setVisible(true);
+                pitchyPanel.setVisible(false);
                 Dimension dimension = new Dimension(width, (int) pitchyPanel.getPreferredSize().getHeight());
                 pitchyPanel.setSize(dimension);
-                out(String.format("tuning: %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | percent=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, ratio, width));
-
-                Color chromaColor = interpolate(ratio, chromaToColor.get(guess.getChroma()), chromaToColor.get(pitchy.getChroma()));
-                chromaPanel.setBackground(chromaColor);
+                out(String.format("tuning: %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | ratio=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, ratio, width));
             }
+            Color chromaColor = interpolate(ratio, guessColor, pitchyColor);
+            chromaPanel.setBackground(chromaColor);
+
+            Color borderColor = interpolate(ratio * 20, guessColor, pitchyColor);
+            chromaPanel.setBorder(BorderFactory.createLineBorder(borderColor));
         }
     }
 
     private Color interpolate(double ratio, Color color1, Color color2) {
+        if (ratio > 1) {
+            ratio = 1;
+        }
         int red = (int) (color2.getRed() * ratio + color1.getRed() * (1 - ratio));
         int green = (int) (color2.getGreen() * ratio + color1.getGreen() * (1 - ratio));
         int blue = (int) (color2.getBlue() * ratio + color1.getBlue() * (1 - ratio));
