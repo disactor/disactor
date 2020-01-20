@@ -1,4 +1,5 @@
 
+- Natural color i.e. match proportion frequency directly to octave
 - Configuration: show log, notes, range, probability, octave tolerance, playInit="", export config do txt
 - slf4j
 

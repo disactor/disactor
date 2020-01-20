@@ -38,22 +38,80 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             .filter(note -> !excludes.contains(note))
             .collect(Collectors.toList());
 
+//    Do0("Do0", "C0", 16.35),
+//    Si0("Si0", "B0", 30.87),
+//    Do1("Do1", "C1", 32.7),
+//    Do2("Do2", "C2", 65.41),
+//    Do3("Do3", "C3", 130.81),
+//    Do4("Do4", "C4", 261.63),
+
+//    Do5("Do5", "C5", 523.25),
+//    Di5("Di5", "C#5", 554.37),
+//    Re5("Re5", "D5", 587.33),
+//    Ri5("Ri5", "D#5", 622.25),
+//    Mi5("Mi5", "E5", 659.25),
+//    Fa5("Fa5", "F5", 698.46),
+//    Fi5("Fi5", "F#5", 739.99),
+//    So5("So5", "G5", 783.99),
+//    Se5("Se5", "G#5", 830.61),
+//    La5("La5", "A5", 880),
+//    Li5("Li5", "A#5", 932.33),
+//    Si5("Si5", "B5", 987.77),
+
+//    Do6("Do6", "C6", 1046.5),
+//    Do7("Do7", "C7", 2093),
+//    Do8("Do8", "C8", 4186.01),
+//    Si8("Si8", "B8", 7902.13);
+
     //    tuning: Mi2 | pitch=82.56Hz | diff=0.15 | pitchy=4.90 | percent=3.02 | width=9
 // https://www.nature.com/articles/s41598-017-18150-y/figures/2
+//            -65536
+//            -20561
+//            -33024
+//            -8421632
+//            -256
+//            -16711936
+//            -16744577
+//            -16711681
+//            -16777089
+//            -16776961
+//            -65281
+//            -8453889
+
     private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
-            .put("Do", new Color(255, 0, 0)) //    Red: 620-750 nm (400-484 THz frequency)
-            .put("Di", new Color(127, 0,0))
-            .put("Re", new Color(255, 127, 0))    //    Orange: 590-620 nm
-            .put("Ri", new Color(127, 127, 0))
-            .put("Mi", new Color(255, 255, 0))   //    Yellow: 570-590 nm
-            .put("Fa", new Color(0, 255, 0))  //    Green: 495-570 nm
-            .put("Fi", new Color(0, 127,127))
-            .put("So", new Color(0, 255, 255)) // Light-blue
-            .put("Se", new Color(0, 0, 127))
-            .put("La", new Color(0, 0, 255)) //    Blue: 450-495 nm
-            .put("Li", new Color(127, 0, 127))
+            .put("Do", new Color(255, 0, 0)) // Red 620-750 nm (400-484 THz frequency)
+            .put("Di", new Color(127, 0,0)) // Bordo
+//            .put("Di", new Color(255, 175,175)) // Pink
+            .put("Re", new Color(255, 127, 0))    // Orange 590-620 nm
+            .put("Ri", new Color(127, 127, 0)) // Olive
+            .put("Mi", new Color(255, 255, 0))   // Yellow 570-590 nm
+            .put("Fa", new Color(0, 255, 0))  // Green 495-570 nm
+            .put("Fi", new Color(0, 127,127))  // Pine
+            .put("So", new Color(0, 255, 255)) // Cyan
+            .put("Se", new Color(0, 0, 127)) // Navy
+            .put("La", new Color(0, 0, 255)) // Blue: 450-495 nm
+            .put("Li", new Color(255, 0, 255)) // Magenta
+//            .put("Li", new Color(127, 0, 127)) // Raspberry
             .put("Si", new Color(127, 0, 255)) //    Violet: 380-450 nm (688-789 THz frequency)
             .build();
+
+
+//    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
+//            .put("Do", new Color(255, 0, 0)) // Red 620-750 nm (400-484 THz frequency)
+//            .put("Re", new Color(255, 127, 0))    // Orange 590-620 nm
+//            .put("Ri", new Color(127, 127, 0)) // Olive
+//            .put("Mi", new Color(255, 255, 0))   // Yellow 570-590 nm
+//            .put("Fa", new Color(0, 255, 0))  // Green 495-570 nm
+//            .put("Fi", new Color(0, 127,127))  // Pine
+//            .put("So", new Color(0, 255, 255)) // Cyan
+//            .put("Se", new Color(0, 0, 127)) // Navy
+//            .put("La", new Color(0, 0, 255)) // Blue: 450-495 nm
+//            .put("Li", new Color(255, 0, 255)) // Magenta
+//            .put("Si", new Color(127, 0, 255)) //    Violet: 380-450 nm (688-789 THz frequency)
+//            .build();
+
+    //            .put("Di", new Color(127, 0,0)) // Bordo
+//            .put("Li", new Color(127, 0, 127)) // Raspberry
 
     //    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
 //            .put("Do", new MyColor(99.2f, 79.6f, 1.2f)) // .put("Di", new MyColor(25.4f, 1.2f, 29.4f)) // original Di color
@@ -80,6 +138,8 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
     private final JPanel guessPanel;
     private final JLabel guessLabel;
     private final JLabel riddleLabel;
+    private final JPanel pitchyPanel;
+    private final JPanel chromaPanel;
 
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
@@ -88,8 +148,6 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
     private final Random random = new Random();
     private final Executor executor = Executors.newSingleThreadExecutor();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final JPanel flatPanel;
-    private final JPanel sharpPanel;
     private volatile AudioDispatcher dispatcher;
     private volatile Mixer currentMixer;
     private volatile PitchEstimationAlgorithm algo = defaultPitchAlgo;
@@ -110,10 +168,9 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                         riddleLabel.setText(" " + riddle.getChroma() + " ");
                         riddlePanel.setBackground(riddleColor);
                         guessLabel.setText("    ");
-                        guessLabel.setVisible(false);
                         guessPanel.setBackground(null);
-                        flatPanel.setVisible(false);
-                        sharpPanel.setVisible(false);
+                        pitchyPanel.setBackground(null);
+                        chromaPanel.setBackground(null);
                     });
                     player.play(riddleNote);
                 }
@@ -162,30 +219,35 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             Pitch flat = pitchByOrdinal.get(guess.ordinal() - 1);
             Pitch sharp = pitchByOrdinal.get(guess.ordinal() + 1);
             if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but who cares?
-                flatPanel.setBackground(chromaToColor.get(flat.getChroma()));
-                sharpPanel.setBackground(chromaToColor.get(sharp.getChroma()));
-                JPanel panel;
-                JPanel otherPanel;
                 Pitch pitchy;
                 if (diff < 0) {
-                    panel = flatPanel;
-                    otherPanel = sharpPanel;
                     pitchy = flat;
                 } else {
-                    panel = sharpPanel;
-                    otherPanel = flatPanel;
                     pitchy = sharp;
                 }
+                pitchyPanel.setBackground(chromaToColor.get(pitchy.getChroma()));
+
                 double pitchyDiff = Math.abs(guess.getPitch() - pitchy.getPitch());
-                double percentage = Math.abs(diff) * 100 / pitchyDiff;
-                int width = (int) percentage * 3;
-                Dimension dimension = new Dimension(width, (int) panel.getPreferredSize().getHeight());
-                out(String.format("tuning: %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | percent=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, percentage, width));
-                panel.setSize(dimension);
-                panel.setVisible(true);
-                otherPanel.setVisible(false);
+                double ratio = Math.abs(diff)  / pitchyDiff;
+                int width = (int) (ratio * 300) + 1;
+//                if (width < 1) {
+//                    width = 1;
+//                }
+                Dimension dimension = new Dimension(width, (int) pitchyPanel.getPreferredSize().getHeight());
+                pitchyPanel.setSize(dimension);
+                out(String.format("tuning: %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | percent=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, ratio, width));
+
+                Color chromaColor = interpolate(ratio, chromaToColor.get(guess.getChroma()), chromaToColor.get(pitchy.getChroma()));
+                chromaPanel.setBackground(chromaColor);
             }
         }
+    }
+
+    private Color interpolate(double ratio, Color color1, Color color2) {
+        int red = (int) (color2.getRed() * ratio + color1.getRed() * (1 - ratio));
+        int green = (int) (color2.getGreen() * ratio + color1.getGreen() * (1 - ratio));
+        int blue = (int) (color2.getBlue() * ratio + color1.getBlue() * (1 - ratio));
+        return new Color(red, green, blue);
     }
 
     private Pitch matchPitch(float pitch) {
@@ -311,7 +373,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         JPanel labelsPanel = new JPanel();
         guessPanel.add(labelsPanel);
         labelsPanel.setOpaque(false);
-        labelsPanel.setLayout(new GridLayout(2, 1));
+        labelsPanel.setLayout(new GridLayout(3, 1));
 
         JPanel guessLabelPanel = new JPanel();
         labelsPanel.add(guessLabelPanel);
@@ -324,35 +386,21 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         guessLabel.setForeground(Color.WHITE);
         guessLabel.setBackground(Color.BLACK);
 
-        JPanel tunerPanel = new JPanel();
-        labelsPanel.add(tunerPanel);
-        tunerPanel.setLayout(new GridBagLayout());
-        tunerPanel.setOpaque(false);
-
         JPanel flatHolder = new JPanel();
-//        flatHolder.setBorder(BorderFactory.createLineBorder(Color.RED));
-        tunerPanel.add(flatHolder, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
-        flatHolder.setPreferredSize(new Dimension(200, 20));
-        flatHolder.setSize(new Dimension(200, 20));
+        labelsPanel.add(flatHolder);
         flatHolder.setOpaque(false);
         flatHolder.setLayout(new GridBagLayout());
-        flatPanel = new JPanel();
-        flatHolder.add(flatPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
-        flatPanel.setOpaque(true);
-        flatPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        pitchyPanel = new JPanel();
+        flatHolder.add(pitchyPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
+        pitchyPanel.setPreferredSize(new Dimension(400, 20));
+        pitchyPanel.setSize(new Dimension(400, 20));
+        pitchyPanel.setOpaque(true);
 
-        JPanel sharpHolder = new JPanel();
-//        sharpHolder.setBorder(BorderFactory.createLineBorder(Color.RED));
-        tunerPanel.add(sharpHolder, new GridBagConstraints(1, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
-        sharpHolder.setPreferredSize(new Dimension(200, 20));
-        sharpHolder.setSize(new Dimension(200, 20));
-        sharpHolder.setOpaque(false);
-        sharpHolder.setLayout(new GridBagLayout());
-        sharpPanel = new JPanel();
-        sharpHolder.add(sharpPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
-        sharpPanel.setAlignmentX(0);
-        sharpPanel.setOpaque(true);
-        sharpPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        chromaPanel = new JPanel();
+        labelsPanel.add(chromaPanel);
+        chromaPanel.setPreferredSize(new Dimension(400, 20));
+        chromaPanel.setSize(new Dimension(400, 20));
+        chromaPanel.setOpaque(true);
 
         JPanel colorsPanel = new JPanel();
         add(colorsPanel);
@@ -371,8 +419,6 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         pack();
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation(screen.width - getSize().width - 15, screen.height / 2 - getSize().height / 2);
-        tunerPanel.setPreferredSize(new Dimension(getWidth(), (int) tunerPanel.getPreferredSize().getHeight()));
-        tunerPanel.setSize(new Dimension(getWidth(), (int) tunerPanel.getPreferredSize().getHeight()));
         setVisible(true);
 
         executor.execute(() -> {
@@ -510,14 +556,6 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                 button.addActionListener(algoChangedListener);
             }
         }
-    }
-
-    public static class MyColor extends Color {
-
-        public MyColor(float r, float g, float b) {
-            super(r / 100, g / 100, b / 100);
-        }
-
     }
 
 }
