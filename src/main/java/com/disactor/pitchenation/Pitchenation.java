@@ -37,20 +37,38 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                     .map(letter -> letter + octave))
             .filter(note -> !excludes.contains(note))
             .collect(Collectors.toList());
+
+    //    tuning: Mi2 | pitch=82.56Hz | diff=0.15 | pitchy=4.90 | percent=3.02 | width=9
+// https://www.nature.com/articles/s41598-017-18150-y/figures/2
     private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
-            .put("Do", new MyColor(99.2f, 79.6f, 1.2f)) // .put("Di", new MyColor(25.4f, 1.2f, 29.4f)) // original Di color
-            .put("Di", new MyColor(45.4f, 1.2f, 29.4f))
-            .put("Re", new MyColor(1.2f, 70.2f, 99.2f)) // .put("Ri", new MyColor(95.7f, 22.0f, 2.4f)) // original Ri color
-            .put("Ri", new Color(255, 113, 0))
-            .put("Mi", new MyColor(98.0f, 43.5f, 98.8f))
-            .put("Fa", new MyColor(0.8f, 98.8f, 14.5f))
-            .put("Fi", new MyColor(1.2f, 34.5f, 27.1f))
-            .put("So", new MyColor(98.8f, 0.8f, 0.8f))
-            .put("Se", new MyColor(6.3f, 9.4f, 41.6f))
-            .put("La", new MyColor(98.4f, 96.1f, 67.8f))
-            .put("Li", new MyColor(0.8f, 95.3f, 68.8f)) // .put("Li", new MyColor(0.8f, 95.3f, 98.8f)) // original Li color
-            .put("Si", new MyColor(85.9f, 75.3f, 95.7f))
+            .put("Do", new Color(255, 0, 0)) //    Red: 620-750 nm (400-484 THz frequency)
+            .put("Di", new Color(127, 0,0))
+            .put("Re", new Color(255, 127, 0))    //    Orange: 590-620 nm
+            .put("Ri", new Color(127, 127, 0))
+            .put("Mi", new Color(255, 255, 0))   //    Yellow: 570-590 nm
+            .put("Fa", new Color(0, 255, 0))  //    Green: 495-570 nm
+            .put("Fi", new Color(0, 127,127))
+            .put("So", new Color(0, 255, 255)) // Light-blue
+            .put("Se", new Color(0, 0, 127))
+            .put("La", new Color(0, 0, 255)) //    Blue: 450-495 nm
+            .put("Li", new Color(127, 0, 127))
+            .put("Si", new Color(127, 0, 255)) //    Violet: 380-450 nm (688-789 THz frequency)
             .build();
+
+    //    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
+//            .put("Do", new MyColor(99.2f, 79.6f, 1.2f)) // .put("Di", new MyColor(25.4f, 1.2f, 29.4f)) // original Di color
+//            .put("Di", new MyColor(45.4f, 1.2f, 29.4f))
+//            .put("Re", new MyColor(1.2f, 70.2f, 99.2f)) // .put("Ri", new MyColor(95.7f, 22.0f, 2.4f)) // original Ri color
+//            .put("Ri", new Color(255, 113, 0))
+//            .put("Mi", new MyColor(98.0f, 43.5f, 98.8f))
+//            .put("Fa", new MyColor(0.8f, 98.8f, 14.5f))
+//            .put("Fi", new MyColor(1.2f, 34.5f, 27.1f))
+//            .put("So", new MyColor(98.8f, 0.8f, 0.8f))
+//            .put("Se", new MyColor(6.3f, 9.4f, 41.6f))
+//            .put("La", new MyColor(98.4f, 96.1f, 67.8f))
+//            .put("Li", new MyColor(0.8f, 95.3f, 68.8f)) // .put("Li", new MyColor(0.8f, 95.3f, 98.8f)) // original Li color
+//            .put("Si", new MyColor(85.9f, 75.3f, 95.7f))
+//            .build();
     private static final Map<String, Pitch> pitchByNote = Stream.of(Pitch.values())
             .collect(Collectors.toMap(Pitch::getNote, pitch -> pitch));
     private static final Map<Integer, Pitch> pitchByOrdinal = Stream.of(Pitch.values())
