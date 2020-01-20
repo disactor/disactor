@@ -1,22 +1,26 @@
 
-- Play intervals to C on success.
 - Configuration: show log, notes, range, probability, octave tolerance, playInit="", export config do txt
+- slf4j
 
-    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
-            .put("Do", new MyColor(99.2f, 79.6f, 1.2f))
-            .put("Dee", new MyColor(20.4f, 1.2f, 29.4f))
-            .put("De", new MyColor(20.4f, 1.2f, 29.4f))
-            .put("See", new MyColor(6.3f, 9.4f, 41.6f))
-            .put("Di", new MyColor(25.4f, 1.2f, 29.4f))
 
-//            .put("Re", new MyColor(1.2f, 70.2f, 99.2f))
-//            .put("Ri", new MyColor(95.7f, 22.0f, 2.4f))
-            .put("Mi", new MyColor(98.0f, 43.5f, 98.8f))
-            .put("Fa", new MyColor(0.8f, 98.8f, 14.5f))
-            .put("Fi", new MyColor(1.2f, 34.5f, 27.1f))
-            .put("So", new MyColor(98.8f, 0.8f, 0.8f))
-            .put("Se", new MyColor(6.3f, 9.4f, 41.6f))
-            .put("La", new MyColor(98.4f, 96.1f, 67.8f))
-            .put("Li", new MyColor(0.8f, 95.3f, 98.8f))
-            .put("Si", new MyColor(85.9f, 75.3f, 95.7f))
-            .build();
+ [Fa] Fa  -  [Fa4] Fa2 [349.23Hz] 87.90Hz - 1.00 | 4.13639
+ [Ri6] is the new riddle
+  [Ri] Fa  -  [Ri6] Fa2 [1244.51Hz] -1.00Hz - 0.00 | 0.00000
+  [Ri] Re  -  [Ri6] Re3 [1244.51Hz] 147.32Hz - 1.00 | 4.18435
+  [Ri] Do  -  [Ri6] Do3 [1244.51Hz] 133.71Hz - 0.54 | 5.46120
+  [Ri] Do  -  [Ri6] Do3 [1244.51Hz] 131.06Hz - 1.00 | 4.51195
+  [Ri] Re  -  [Ri6] Re3 [1244.51Hz] 147.24Hz - 1.00 | 4.67377
+  [Ri] Ri  -  [Ri6] Ri3 [1244.51Hz] 156.90Hz - 1.00 | 4.43824
+ [Fi6] is the new riddle
+Exception in thread "Audio dispatching" java.lang.IllegalStateException: sequencer not open
+	at com.sun.media.sound.RealTimeSequencer.start(RealTimeSequencer.java:243)
+	at org.jfugue.player.ManagedPlayer.start(ManagedPlayer.java:79)
+	at org.jfugue.player.Player.play(Player.java:96)
+	at org.jfugue.player.Player.play(Player.java:82)
+	at com.disactor.pitchenation.Pitchenation.play(Pitchenation.java:105)
+	at com.disactor.pitchenation.Pitchenation.play(Pitchenation.java:133)
+	at com.disactor.pitchenation.Pitchenation.handlePitch(Pitchenation.java:238)
+	at be.tarsos.dsp.pitch.PitchProcessor.process(Unknown Source)
+	at be.tarsos.dsp.AudioDispatcher.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:748)
+

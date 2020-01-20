@@ -112,25 +112,25 @@ public enum Pitch {
     Si8("Si8", "B8", 7902.13);
 
     private final String chroma;
+    private final String echroma;
     private final String note;
     private final double pitch;
-    private final String baseChroma;
     private final int octave;
 
-    Pitch(String chroma, String note, double pitch) {
-        this.chroma = chroma;
+    Pitch(String echroma, String note, double pitch) {
+        this.echroma = echroma;
         this.note = note;
         this.pitch = pitch;
-        this.baseChroma = chroma.substring(0, 2);
-        this.octave = Integer.parseInt(chroma.substring(2, 3));
+        this.chroma = echroma.substring(0, 2);
+        this.octave = Integer.parseInt(echroma.substring(2, 3));
+    }
+
+    public String getEchroma() {
+        return echroma;
     }
 
     public String getChroma() {
         return chroma;
-    }
-
-    public String getBaseChroma() {
-        return baseChroma;
     }
 
     public int getOctave() {
