@@ -2,4 +2,18 @@
 .gradle
 
 # Ignore Gradle build output directory
-build
+build 
+
+# Intellij
+*.iml
+*.iws
+.idea/*.*
+.idea/copyright
+.idea/inspectionProfiles
+.idea/libraries
+.idea/modules
+.idea/scopes
+.idea/shelf
+.idea/dataSources
+.idea/artifacts
+.idea/codeStyles 
