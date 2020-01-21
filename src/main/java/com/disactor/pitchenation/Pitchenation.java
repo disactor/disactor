@@ -19,6 +19,7 @@ import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,13 +31,13 @@ import java.util.stream.Stream;
 public class Pitchenation extends JFrame implements PitchDetectionHandler {
 
     private static final String[] scale = new String[]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-    private static final String[] octaves = new String[]{"3", "4", "5", "6", "7"};
-    private static final Set<String> excludes = new LinkedHashSet<>(Arrays.asList("C3", "C#3", "D3", "D#3", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7"));
-    private static final List<String> notes = Stream.of(octaves)
-            .flatMap(octave -> Stream.of(scale)
-                    .map(letter -> letter + octave))
-            .filter(note -> !excludes.contains(note))
-            .collect(Collectors.toList());
+    private static final int[] octaves = new int[]{3, 4, 5, 6, 7};
+//    private static final Set<String> excludes = new LinkedHashSet<>(Arrays.asList("C3", "C#3", "D3", "D#3", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7"));
+//    private static final List<String> notes = Stream.of(octaves)
+//            .flatMap(octave -> Stream.of(scale)
+//                    .map(letter -> letter + octave))
+//            .filter(note -> !excludes.contains(note))
+//            .collect(Collectors.toList());
 
 //    Do0("Do0", "C0", 16.35),
 //    Si0("Si0", "B0", 30.87),
@@ -65,23 +66,10 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
 
     //    tuning: Mi2 | pitch=82.56Hz | diff=0.15 | pitchy=4.90 | percent=3.02 | width=9
 // https://www.nature.com/articles/s41598-017-18150-y/figures/2
-//            -65536
-//            -20561
-//            -33024
-//            -8421632
-//            -256
-//            -16711936
-//            -16744577
-//            -16711681
-//            -16777089
-//            -16776961
-//            -65281
-//            -8453889
 
     private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
             .put("Do", new Color(255, 0, 0)) // Red 620-750 nm (400-484 THz frequency)
             .put("Di", new Color(127, 0, 0)) // Bordo
-//            .put("Di", new Color(255, 175,175)) // Pink
             .put("Re", new Color(255, 127, 0))    // Orange 590-620 nm
             .put("Ri", new Color(127, 127, 0)) // Olive
             .put("Mi", new Color(255, 255, 0))   // Yellow 570-590 nm
@@ -91,29 +79,12 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             .put("Se", new Color(0, 0, 127)) // Navy
             .put("La", new Color(0, 0, 255)) // Blue: 450-495 nm
             .put("Li", new Color(255, 0, 255)) // Magenta
-//            .put("Li", new Color(127, 0, 127)) // Raspberry
             .put("Si", new Color(127, 0, 255)) //    Violet: 380-450 nm (688-789 THz frequency)
             .build();
 
-
-//    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
-//            .put("Do", new Color(255, 0, 0)) // Red 620-750 nm (400-484 THz frequency)
-//            .put("Re", new Color(255, 127, 0))    // Orange 590-620 nm
-//            .put("Ri", new Color(127, 127, 0)) // Olive
-//            .put("Mi", new Color(255, 255, 0))   // Yellow 570-590 nm
-//            .put("Fa", new Color(0, 255, 0))  // Green 495-570 nm
-//            .put("Fi", new Color(0, 127,127))  // Pine
-//            .put("So", new Color(0, 255, 255)) // Cyan
-//            .put("Se", new Color(0, 0, 127)) // Navy
-//            .put("La", new Color(0, 0, 255)) // Blue: 450-495 nm
-//            .put("Li", new Color(255, 0, 255)) // Magenta
-//            .put("Si", new Color(127, 0, 255)) //    Violet: 380-450 nm (688-789 THz frequency)
-//            .build();
-
-    //            .put("Di", new Color(127, 0,0)) // Bordo
+//            .put("Di", new Color(255, 175,175)) // Pink
 //            .put("Li", new Color(127, 0, 127)) // Raspberry
-
-    //    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
+//    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
 //            .put("Do", new MyColor(99.2f, 79.6f, 1.2f)) // .put("Di", new MyColor(25.4f, 1.2f, 29.4f)) // original Di color
 //            .put("Di", new MyColor(45.4f, 1.2f, 29.4f))
 //            .put("Re", new MyColor(1.2f, 70.2f, 99.2f)) // .put("Ri", new MyColor(95.7f, 22.0f, 2.4f)) // original Ri color
@@ -138,10 +109,9 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
     private final JPanel guessPanel;
     private final JLabel guessLabel;
     private final JLabel riddleLabel;
-    private final JPanel pitchyPanel;
     private final JPanel chromaPanel;
 
-    private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
+    private final Queue<Pitch> riddleQueue = new ArrayBlockingQueue<>(scale.length);
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> guess = new AtomicReference<>(null);
     private final Player player = new Player();
@@ -155,12 +125,17 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
     private void play(float pitch, float probability, double rms, Pitch guess) {
         if (isRunning.get()) {
             while (this.riddle.get() == null) {
-                int index = random.nextInt(notes.size());
-                String riddleNote = notes.get(index);
-                Pitch riddle = pitchByNote.get(riddleNote);
-                Pitch prevRiddle = this.prevRiddle.get();
-                if (riddle != null
-                        && (prevRiddle == null || !riddle.getChroma().equals(prevRiddle.getChroma()))) {
+                if (riddleQueue.size() == 0) {
+                    List<Pitch> riddles = Arrays.stream(scale)
+                            .map(letter -> letter + (random.nextInt(octaves.length - octaves[0]) + octaves[0]))
+                            .map(pitchByNote::get)
+                            .collect(Collectors.toList());
+                    Collections.shuffle(riddles);
+                    out(" " + riddles + " are the next riddles");
+                    riddleQueue.addAll(riddles);
+                }
+                Pitch riddle = riddleQueue.poll();
+                if (riddle != null) {
                     out(" [" + riddle.getEchroma() + "] is the new riddle");
                     this.riddle.set(riddle);
                     SwingUtilities.invokeLater(() -> {
@@ -169,11 +144,11 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                         riddlePanel.setBackground(riddleColor);
                         guessLabel.setText("    ");
                         guessPanel.setBackground(null);
-                        pitchyPanel.setBackground(null);
-                        pitchyPanel.setVisible(false);
+                        guessLabel.setVisible(false);
                         chromaPanel.setBackground(null);
+                        chromaPanel.setBorder(null);
                     });
-                    player.play(riddleNote);
+                    player.play(riddle.getNote());
                 }
             }
         }
@@ -182,19 +157,15 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
             Pitch riddle = this.riddle.get();
             SwingUtilities.invokeLater(() -> updateGuess(pitch, guess));
             if (riddle != null) {
-                out(String.format("  [%s] %s  -  [%s] %s [%.2fHz] %.2fHz - %.2f | %.5f", riddle.getChroma(), guess.getChroma(), riddle.getEchroma(), guess.getEchroma(), riddle.getPitch(), pitch, probability, rms));
+                if (isRunning.get()) {
+                    out(String.format("  [%s] %s  -  [%s] %s [%.2fHz] %.2fHz - %.2f | %.5f", riddle.getChroma(), guess.getChroma(), riddle.getEchroma(), guess.getEchroma(), riddle.getPitch(), pitch, probability, rms));
+                 }
                 if (guess.getChroma().equals(riddle.getChroma()) && isRunning.get()) {
                     SwingUtilities.invokeLater(() -> riddleLabel.setText(" " + riddle.getChroma() + " "));
-                    this.prevRiddle.set(riddle);
                     this.riddle.set(null);
                     this.guess.set(null);
 
                     player.play(riddle.getNote());
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                     SwingUtilities.invokeLater(() -> {
                         riddleLabel.setText(" " + playOnSuccess.getChroma() + " ");
                         riddlePanel.setBackground(chromaToColor.get(playOnSuccess.getChroma()));
@@ -214,12 +185,10 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         double diff = pitch - guess.getPitch();
         guessLabel.setVisible(true);
         guessLabel.setText(" " + guess.getChroma() + " ");
-        Color guessColor = chromaToColor.get(guess.getChroma());
-        guessPanel.setBackground(guessColor);
 
         Pitch flat = pitchByOrdinal.get(guess.ordinal() - 1);
         Pitch sharp = pitchByOrdinal.get(guess.ordinal() + 1);
-        if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but who cares?
+        if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but meh
             Pitch pitchy;
             if (diff < 0) {
                 pitchy = flat;
@@ -227,22 +196,18 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
                 pitchy = sharp;
             }
             Color pitchyColor = chromaToColor.get(pitchy.getChroma());
-            pitchyPanel.setBackground(pitchyColor);
-
             double pitchyDiff = Math.abs(guess.getPitch() - pitchy.getPitch());
             double ratio = Math.abs(diff) / pitchyDiff;
-            int width = (int) (ratio * 300) + 1;
-            if (!isRunning.get()) {
-//                pitchyPanel.setVisible(true);
-                pitchyPanel.setVisible(false);
-                Dimension dimension = new Dimension(width, (int) pitchyPanel.getPreferredSize().getHeight());
-                pitchyPanel.setSize(dimension);
-                out(String.format("tuning: %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | ratio=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, ratio, width));
+            int width = (int) (ratio * 50) + 1;
+              if (!isRunning.get()) {
+                out(String.format(" %s | pitch=%.2fHz | diff=%.2f | pitchy=%.2f | ratio=%.2f | width=%s", guess.getEchroma(), pitch, diff, pitchyDiff, ratio, width));
             }
-            Color chromaColor = interpolate(ratio, guessColor, pitchyColor);
+            Color chromaColor = chromaToColor.get(guess.getChroma());
             chromaPanel.setBackground(chromaColor);
+            Color guessColor = interpolate(ratio, chromaColor, pitchyColor);
+            guessPanel.setBackground(guessColor);
 
-            Color borderColor = interpolate(ratio * 20, guessColor, pitchyColor);
+            Color borderColor = interpolate(ratio * 20, chromaColor, pitchyColor);
             chromaPanel.setBorder(BorderFactory.createLineBorder(borderColor));
         }
     }
@@ -380,7 +345,7 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         JPanel labelsPanel = new JPanel();
         guessPanel.add(labelsPanel);
         labelsPanel.setOpaque(false);
-        labelsPanel.setLayout(new GridLayout(3, 1));
+        labelsPanel.setLayout(new GridLayout(2, 1));
 
         JPanel guessLabelPanel = new JPanel();
         labelsPanel.add(guessLabelPanel);
@@ -392,16 +357,6 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
         guessLabel.setText("    ");
         guessLabel.setForeground(Color.WHITE);
         guessLabel.setBackground(Color.BLACK);
-
-        JPanel flatHolder = new JPanel();
-        labelsPanel.add(flatHolder);
-        flatHolder.setOpaque(false);
-        flatHolder.setLayout(new GridBagLayout());
-        pitchyPanel = new JPanel();
-        flatHolder.add(pitchyPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 10, 0));
-        pitchyPanel.setPreferredSize(new Dimension(400, 20));
-        pitchyPanel.setSize(new Dimension(400, 20));
-        pitchyPanel.setOpaque(true);
 
         chromaPanel = new JPanel();
         labelsPanel.add(chromaPanel);
@@ -449,27 +404,27 @@ public class Pitchenation extends JFrame implements PitchDetectionHandler {
     }
 
     private void updateStartStopButton(JButton startStopButton) {
-        System.out.println("\nisRunning=" + isRunning.get());
+        out("\nisRunning=" + isRunning.get());
         boolean updated = isRunning.compareAndSet(false, true);
-        System.out.println("updatedToTrue=" + updated);
+        out("updatedToTrue=" + updated);
         if (updated) {
             Pitchenation.this.riddle.set(null);
             executor.execute(() -> play(-1, 0, 0, null));
             startStopButton.setText("Stop");
         } else {
             updated = isRunning.compareAndSet(true, false);
-            System.out.println("updatedToFalse=" + updated);
+            out("updatedToFalse=" + updated);
             if (updated) {
                 riddlePanel.setBackground(null);
                 riddleLabel.setText("");
             } else {
-                System.out.println("Weird - should not happen");
+                out("Weird - should not happen");
             }
         }
         if (updated) {
             startStopButton.setText(isRunning.get() ? "Stop" : "Start");
         }
-        System.out.println("isRunning=" + isRunning.get());
+        out("isRunning=" + isRunning.get());
     }
 
     private void setNewMixer(Mixer mixer) throws LineUnavailableException {
