@@ -25,3 +25,23 @@ Exception in thread "Audio dispatching" java.lang.IllegalStateException: sequenc
 	at be.tarsos.dsp.AudioDispatcher.run(Unknown Source)
 	at java.lang.Thread.run(Thread.java:748)
 
+
+- Alternative color schemes from config files
+// https://www.nature.com/articles/s41598-017-18150-y/figures/2
+    private static final Map<String, Color> chromaToColor = new ImmutableMap.Builder<String, Color>()
+            .put("Do", new Color(253, 203, 3))
+            .put("Di", new Color(65, 3, 75))
+            .put("Re", new Color(3, 179, 253))
+            .put("Ri", new Color(244, 56, 6))
+            .put("Mi", new Color(250, 111, 252))
+            .put("Fa", new Color(2, 252, 37))
+            .put("Fi", new Color(3, 88, 69))
+            .put("So", new Color(252, 2, 2))
+            .put("Se", new Color(16, 24, 106))
+            .put("La", new Color(251, 245, 173))
+            .put("Li", new Color(2, 243, 252))
+            .put("Si", new Color(219, 192, 244))
+            .build();
+
+//            .put("Di", new Color(255, 175,175)) // Pink
+//            .put("Li", new Color(127, 0, 127)) // Raspberry
