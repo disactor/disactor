@@ -8,3 +8,10 @@
  */
 
 rootProject.name = "disactor"
+
+pluginManagement {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}

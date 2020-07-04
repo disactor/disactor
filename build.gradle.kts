@@ -1,32 +1,31 @@
 
 //import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+//buildscript {
+//    repositories {
+//        jcenter()
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.0.RELEASE")
+//    }
+//}
+
 plugins {
     java
     application
     val kotlinVersion = "1.3.21"
-    id("org.springframework.boot") version "2.1.2.RELEASE"
+    id("org.springframework.boot") version "2.2.0.RELEASE"
     id("org.jetbrains.kotlin.jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.jpa") version kotlinVersion
     id("io.spring.dependency-management") version "1.0.6.RELEASE"
 }
 
-
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-//buildscript {
-//    repositories {
-//        mavenCentral()
-//    }
-//    dependencies {
-//        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.2.RELEASE")
-//    }
-//}
-
-
 
 repositories {
     jcenter()
