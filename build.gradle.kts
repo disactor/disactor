@@ -38,9 +38,6 @@ repositories {
 }
 
 dependencies {
-//    implementation("jfugue:jfugue:5.0.9")
-    implementation(files("lib/jfugue-5.0.9.jar"))
-    implementation(files("lib/TarsosDSP-2.4.jar"))
 
 
     implementation("org.springframework.boot:spring-boot-starter-web") {
